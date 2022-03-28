@@ -12,6 +12,7 @@ resource "azurerm_network_interface" "msft-dc" {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.management.id
     private_ip_address_allocation = "Static"
+    private_ip_address = "10.20.15.65"
   }
 }
 
@@ -20,8 +21,9 @@ resource "azurerm_windows_virtual_machine" "msft-dc" {
   resource_group_name = azurerm_resource_group.vms.name
   location            = azurerm_resource_group.vms.location
   size                = "Standard_B2s"
-  admin_username      = "azureadmin"
-  admin_password      = "PaloAltoNetworks1!"
+  admin_username      = var.username
+  admin_password      = var.password
+
   network_interface_ids = [
     azurerm_network_interface.msft-dc.id
   ]

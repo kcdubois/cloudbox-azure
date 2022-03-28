@@ -10,6 +10,12 @@ variable "location" {
     default = "Canada Central"
 }
 
+variable "username" {
+    type = string
+    description = "Username of the default administrator"
+    default = "azureadmin"
+}
+
 variable "password" {
     type = string
     description = "Password used for workload VMs. NOT MEANT TO BE A PRODUCTION-GRADE setup"

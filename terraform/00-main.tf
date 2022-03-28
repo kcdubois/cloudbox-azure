@@ -11,13 +11,15 @@ terraform {
         azurerm = {
             source = "hashicorp/azurerm"
         }
-
-        random = {
-            source = "hashicorp/random"
-        }
     }
 }
 
 provider "azurerm" {
-    features {}
+    features {
+        virtual_machine {
+            delete_os_disk_on_deletion     = false
+            graceful_shutdown              = true
+            skip_shutdown_and_force_delete = false
+        }
+    }
 }

@@ -3,14 +3,14 @@ resource "azurerm_resource_group" "vmseries" {
     location = var.location
 }
 
-resource "random_password" "vmseries_password" {
-  length           = 16
-  min_lower        = 16 - 4
-  min_numeric      = 1
-  min_special      = 1
-  min_upper        = 1
-  special          = true
-  override_special = "_%@"
+resource "azurerm_public_ip" "management_ip" {
+    name = "pip-cloudbox-vmseries-mgmt"
+    location = var.location
+    resource_group_name = azurerm_resource_group.vmseries.name
+
+    sku = "Standard"
+    allocation_method = "Static"
+    tags = var.tags
 }
 
 resource "azurerm_public_ip" "outside_ip" {
@@ -21,7 +21,6 @@ resource "azurerm_public_ip" "outside_ip" {
     sku = "Standard"
     allocation_method = "Static"
     tags = var.tags
-    domain_name_label = "cloudbox-vmseries"
 }
 
 module "vmseries" {
@@ -30,8 +29,8 @@ module "vmseries" {
   location            = var.location
   resource_group_name = azurerm_resource_group.vmseries.name
   name                = "vm-cloudbox-vmseries"
-  username            = "azureadmin"
-  password            = random_password.vmseries_password.result
+  username            = var.username
+  password            = var.password
 
   bootstrap_options = var.bootstrap_options
 
@@ -44,11 +43,13 @@ module "vmseries" {
     {
       name      = "management"
       subnet_id = azurerm_subnet.management.id
+      public_ip_address_id = azurerm_public_ip.management_ip.id
     },
     {
       name      = "public"
       subnet_id = azurerm_subnet.public.id,
       public_ip_address_id = azurerm_public_ip.outside_ip.id
+      enable_ip_forwarding = true
     },
     {
       name      = "private"
@@ -56,9 +57,16 @@ module "vmseries" {
       enable_ip_forwarding = true
     }
   ]
+
+  depends_on = [
+    azurerm_public_ip.management_ip,
+    azurerm_public_ip.outside_ip
+  ]
 }
 
-output "vmseries_password" {
-    value = random_password.vmseries_password.result
-    sensitive = true
+output "vmseries_management_ip" {
+  value = azurerm_public_ip.management_ip.ip_address
+}
+output "vmseries_outside_ip" {
+  value = azurerm_public_ip.outside_ip.ip_address
 }
