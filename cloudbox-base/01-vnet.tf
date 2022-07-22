@@ -61,3 +61,9 @@ resource "azurerm_subnet" "bastion" {
   address_prefixes = ["10.20.0.64/26"]
 }
 
+resource "azurerm_subnet" "vmseries" {
+  name = "vmseries"
+  virtual_network_name = azurerm_virtual_network.cloudbox-vnet.name
+  resource_group_name = azurerm_resource_group.vnet.name
+  address_prefixes = ["10.20.0.128/26"]
+}
